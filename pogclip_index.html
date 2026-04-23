@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PogClip — Your Stream. Auto-Clipped. Right Now.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --bg:       #07090D;
+  --bg2:      #0C0F16;
+  --card:     #111621;
+  --border:   #1C2333;
+  --cyan:     #00F0FF;
+  --pink:     #FF2D6B;
+  --purple:   #8B5CF6;
+  --text:     #EDF2F7;
+  --muted:    #5A6A80;
+  --display:  'Bebas Neue', sans-serif;
+  --body:     'Barlow', sans-serif;
+  --cond:     'Barlow Condensed', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 5vw;
+  background: rgba(7,9,13,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: var(--display);
+  font-size: 2rem;
+  letter-spacing: 3px;
+  color: var(--text);
+  text-decoration: none;
+}
+.logo em { color: var(--cyan); font-style: normal; }
+
+.nav-links { display: flex; gap: 2.5rem; list-style: none; }
+.nav-links a {
+  color: var(--muted); font-size: 0.9rem; font-weight: 500;
+  text-decoration: none; letter-spacing: 0.4px;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+.nav-right { display: flex; gap: 0.75rem; align-items: center; }
+
+.btn-sm {
+  padding: 0.5rem 1.2rem; border-radius: 6px;
+  font-family: var(--body); font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: all 0.2s;
+}
+.btn-outline {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+.btn-cyan {
+  background: var(--cyan); color: #000; border: none;
+}
+.btn-cyan:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 9rem 5vw 5rem;
+  position: relative; overflow: hidden;
+}
+
+/* Animated grid background */
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent);
+}
+
+/* Glow blobs */
+.blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); pointer-events: none;
+}
+.blob-cyan {
+  width: 600px; height: 600px;
+  background: rgba(0,240,255,0.06);
+  top: -100px; left: 50%; transform: translateX(-50%);
+  animation: drift 8s ease-in-out infinite alternate;
+}
+.blob-pink {
+  width: 400px; height: 400px;
+  background: rgba(255,45,107,0.05);
+  bottom: 0; right: -100px;
+  animation: drift 10s ease-in-out infinite alternate-reverse;
+}
+.blob-purple {
+  width: 300px; height: 300px;
+  background: rgba(139,92,246,0.06);
+  top: 30%; left: -80px;
+  animation: drift 12s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  from { transform: translate(0,0); }
+  to   { transform: translate(30px, 20px); }
+}
+
+/* Live badge */
+.live-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(255,45,107,0.1);
+  border: 1px solid rgba(255,45,107,0.25);
+  color: var(--pink);
+  padding: 0.35rem 1rem; border-radius: 100px;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+  animation: fadeUp 0.5s ease both;
+  position: relative; z-index: 1;
+}
+.live-dot {
+  width: 7px; height: 7px;
+  background: var(--pink); border-radius: 50%;
+  animation: livepulse 1.2s infinite;
+}
+@keyframes livepulse {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(255,45,107,0.4); }
+  50% { opacity:0.6; box-shadow: 0 0 0 6px rgba(255,45,107,0); }
+}
+
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(4.5rem, 12vw, 10rem);
+  line-height: 0.92;
+  letter-spacing: 3px;
+  margin-bottom: 1.5rem;
+  position: relative; z-index: 1;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+.hero-title .t-cyan { color: var(--cyan); }
+.hero-title .t-pink { color: var(--pink); }
+
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--muted); max-width: 560px;
+  margin: 0 auto 2.5rem; line-height: 1.7;
+  position: relative; z-index: 1;
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+.hero-sub strong { color: var(--text); }
+
+/* Big CTA */
+.hero-ctas {
+  display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+  position: relative; z-index: 1;
+  animation: fadeUp 0.5s 0.3s ease both;
+}
+
+.btn-big {
+  padding: 1rem 2.4rem; border-radius: 8px;
+  font-family: var(--body); font-size: 1rem; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.2s; letter-spacing: 0.3px;
+}
+.btn-big-cyan {
+  background: var(--cyan); color: #000; border: none;
+  box-shadow: 0 0 30px rgba(0,240,255,0.2);
+}
+.btn-big-cyan:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 50px rgba(0,240,255,0.35);
+}
+.btn-big-ghost {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-big-ghost:hover { border-color: var(--muted); transform: translateY(-2px); }
+
+/* Platform logos */
+.platform-row {
+  display: flex; align-items: center; gap: 1.5rem;
+  margin-top: 3rem; justify-content: center;
+  position: relative; z-index: 1;
+  animation: fadeUp 0.5s 0.4s ease both;
+}
+.platform-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.platform-badges { display: flex; gap: 0.75rem; }
+.platform-badge {
+  background: var(--card); border: 1px solid var(--border);
+  padding: 0.4rem 0.9rem; border-radius: 6px;
+  font-size: 0.85rem; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.twitch-color { color: #9146FF; }
+.kick-color   { color: #53FC18; }
+
+/* Key differentiator callout */
+.diff-banner {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: rgba(0,240,255,0.05);
+  border: 1px solid rgba(0,240,255,0.15);
+  padding: 0.5rem 1.2rem; border-radius: 8px;
+  margin-top: 2rem; font-size: 0.88rem; color: var(--cyan);
+  font-weight: 600; position: relative; z-index: 1;
+  animation: fadeUp 0.5s 0.45s ease both;
+}
+.diff-banner span { color: var(--muted); font-weight: 400; }
+
+/* ══════════════════════════════════════
+   STATS
+══════════════════════════════════════ */
+.stats {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 5vw;
+  display: flex; justify-content: center; gap: 5rem; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: var(--display);
+  font-size: 3.5rem; letter-spacing: 2px;
+  display: block;
+}
+.stat-num.c-cyan { color: var(--cyan); }
+.stat-num.c-pink { color: var(--pink); }
+.stat-num.c-purple { color: var(--purple); }
+.stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 0.25rem; }
+
+/* ══════════════════════════════════════
+   THE BIG DIFFERENCE SECTION
+══════════════════════════════════════ */
+.difference {
+  padding: 7rem 5vw;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; align-items: center;
+  max-width: 1200px; margin: 0 auto;
+}
+.diff-left .pill {
+  display: inline-block;
+  background: rgba(255,45,107,0.1); border: 1px solid rgba(255,45,107,0.2);
+  color: var(--pink); font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 0.3rem 0.9rem; border-radius: 100px; margin-bottom: 1.5rem;
+}
+.diff-left h2 {
+  font-family: var(--display);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: 1px; line-height: 0.95;
+  margin-bottom: 1.5rem;
+}
+.diff-left h2 em { color: var(--cyan); font-style: normal; }
+.diff-left p { color: var(--muted); font-size: 1.05rem; line-height: 1.75; margin-bottom: 1rem; }
+.diff-left p strong { color: var(--text); }
+
+.compare-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+.compare-header {
+  display: grid; grid-template-columns: 2fr 1fr 1fr;
+  padding: 1rem 1.5rem;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+}
+.compare-header .col-pogclip { color: var(--cyan); }
+.compare-row {
+  display: grid; grid-template-columns: 2fr 1fr 1fr;
+  padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+  font-size: 0.92rem; align-items: center;
+  transition: background 0.15s;
+}
+.compare-row:hover { background: rgba(255,255,255,0.02); }
+.compare-row:last-child { border-bottom: none; }
+.compare-feature { color: var(--text); font-weight: 500; }
+.check { color: var(--cyan); font-size: 1.1rem; text-align: center; }
+.cross { color: var(--muted); text-align: center; font-size: 1rem; }
+
+/* ══════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════ */
+.hiw { padding: 7rem 5vw; text-align: center; }
+.section-tag {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 3px;
+  color: var(--cyan); font-weight: 700; margin-bottom: 0.75rem;
+}
+.section-title {
+  font-family: var(--display);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: 1px; margin-bottom: 1rem;
+}
+.section-sub { color: var(--muted); max-width: 500px; margin: 0 auto 4rem; font-size: 1.05rem; }
+
+.steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem; max-width: 1100px; margin: 0 auto;
+}
+.step-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 2rem 1.5rem;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  text-align: left;
+}
+.step-card:hover { border-color: var(--cyan); transform: translateY(-4px); }
+.step-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  opacity: 0; transition: opacity 0.2s;
+}
+.step-card:hover::before { opacity: 1; }
+
+.step-num {
+  font-family: var(--display);
+  font-size: 4rem; color: rgba(0,240,255,0.08);
+  position: absolute; top: 0.5rem; right: 1rem;
+  letter-spacing: 0;
+}
+.step-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin-bottom: 1.2rem;
+}
+.step-card h3 {
+  font-family: var(--cond); font-size: 1.3rem; font-weight: 800;
+  letter-spacing: 0.5px; margin-bottom: 0.6rem; color: var(--text);
+}
+.step-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+/* ══════════════════════════════════════
+   CLIP TEMPLATES
+══════════════════════════════════════ */
+.templates { padding: 6rem 5vw; background: var(--bg2); }
+.templates-inner { max-width: 1100px; margin: 0 auto; }
+.templates-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem; margin-top: 3rem;
+}
+.template-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem 1.2rem;
+  cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.template-card:hover { transform: translateY(-3px); }
+.template-card.active { border-color: var(--cyan); }
+.template-card.active::after {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(0,240,255,0.04); pointer-events: none;
+}
+.template-emoji { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+.template-name {
+  font-family: var(--cond); font-size: 1rem; font-weight: 800;
+  letter-spacing: 0.5px; margin-bottom: 0.4rem;
+}
+.template-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+.template-tag {
+  display: inline-block; margin-top: 0.75rem;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 100px;
+}
+.tag-cyan { background: rgba(0,240,255,0.1); color: var(--cyan); }
+.tag-pink { background: rgba(255,45,107,0.1); color: var(--pink); }
+.tag-purple { background: rgba(139,92,246,0.1); color: var(--purple); }
+
+/* ══════════════════════════════════════
+   PRICING
+══════════════════════════════════════ */
+.pricing { padding: 7rem 5vw; text-align: center; }
+.pricing-cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem; max-width: 900px; margin: 3rem auto 0;
+}
+.pricing-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2.5rem 2rem;
+  text-align: left; position: relative; overflow: hidden;
+  transition: transform 0.2s;
+}
+.pricing-card:hover { transform: translateY(-4px); }
+.pricing-card.featured {
+  border-color: var(--cyan);
+  box-shadow: 0 0 40px rgba(0,240,255,0.08);
+}
+.pricing-card.featured::before {
+  content: 'MOST POPULAR';
+  position: absolute; top: 1.2rem; right: 1.2rem;
+  background: var(--cyan); color: #000;
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px;
+  padding: 0.25rem 0.7rem; border-radius: 100px;
+}
+.pricing-name {
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;
+  color: var(--muted); font-weight: 700; margin-bottom: 1rem;
+}
+.pricing-price {
+  font-family: var(--display);
+  font-size: 4rem; letter-spacing: 1px; line-height: 1;
+  margin-bottom: 0.25rem;
+}
+.pricing-price sup { font-size: 1.5rem; vertical-align: top; margin-top: 0.75rem; display: inline-block; }
+.pricing-price sub { font-family: var(--body); font-size: 1rem; color: var(--muted); font-weight: 400; }
+.pricing-desc { color: var(--muted); font-size: 0.88rem; margin-bottom: 2rem; line-height: 1.6; }
+.pricing-feats { list-style: none; margin-bottom: 2rem; }
+.pricing-feats li {
+  padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+  font-size: 0.9rem; display: flex; align-items: center; gap: 0.6rem;
+  color: var(--text);
+}
+.pricing-feats li:last-child { border-bottom: none; }
+.feat-check { color: var(--cyan); font-weight: 700; }
+.feat-cross { color: var(--muted); }
+.btn-pricing {
+  width: 100%; padding: 0.85rem;
+  border-radius: 8px; font-family: var(--body);
+  font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  display: block; text-align: center;
+  transition: all 0.2s; border: none;
+}
+.btn-pricing-cyan { background: var(--cyan); color: #000; }
+.btn-pricing-cyan:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-pricing-outline {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-pricing-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ══════════════════════════════════════
+   TESTIMONIALS
+══════════════════════════════════════ */
+.testimonials { padding: 6rem 5vw; background: var(--bg2); }
+.testimonials-inner { max-width: 1100px; margin: 0 auto; }
+.testi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem; margin-top: 3rem;
+}
+.testi-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.8rem;
+  transition: border-color 0.2s;
+}
+.testi-card:hover { border-color: var(--border); }
+.testi-stars { color: #F5A623; font-size: 0.9rem; margin-bottom: 1rem; letter-spacing: 2px; }
+.testi-text { font-size: 0.95rem; color: var(--text); line-height: 1.7; margin-bottom: 1.2rem; font-style: italic; }
+.testi-author { display: flex; align-items: center; gap: 0.75rem; }
+.testi-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+}
+.av-cyan { background: rgba(0,240,255,0.15); color: var(--cyan); }
+.av-pink { background: rgba(255,45,107,0.15); color: var(--pink); }
+.av-purple { background: rgba(139,92,246,0.15); color: var(--purple); }
+.testi-name { font-weight: 600; font-size: 0.9rem; }
+.testi-handle { font-size: 0.78rem; color: var(--muted); }
+
+/* ══════════════════════════════════════
+   FAQ
+══════════════════════════════════════ */
+.faq { padding: 6rem 5vw; max-width: 760px; margin: 0 auto; }
+.faq-list { margin-top: 3rem; }
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 0; cursor: pointer;
+}
+.faq-q {
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: 600; font-size: 1rem; color: var(--text);
+}
+.faq-icon { color: var(--cyan); font-size: 1.3rem; transition: transform 0.2s; flex-shrink: 0; }
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+.faq-a {
+  color: var(--muted); font-size: 0.92rem; line-height: 1.75;
+  max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s;
+}
+.faq-item.open .faq-a { max-height: 200px; padding-top: 1rem; }
+
+/* ══════════════════════════════════════
+   FINAL CTA
+══════════════════════════════════════ */
+.final-cta {
+  padding: 8rem 5vw; text-align: center;
+  position: relative; overflow: hidden;
+}
+.final-cta::before {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(0,240,255,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.final-cta h2 {
+  font-family: var(--display);
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  letter-spacing: 2px; line-height: 0.95;
+  margin-bottom: 1.5rem; position: relative;
+}
+.final-cta h2 em { color: var(--cyan); font-style: normal; }
+.final-cta p { color: var(--muted); font-size: 1.1rem; margin-bottom: 2.5rem; position: relative; }
+.final-cta .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; }
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 3rem 5vw;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1.5rem;
+}
+.footer-logo { font-family: var(--display); font-size: 1.6rem; letter-spacing: 2px; }
+.footer-logo em { color: var(--cyan); font-style: normal; }
+.footer-links { display: flex; gap: 2rem; flex-wrap: wrap; }
+.footer-links a { color: var(--muted); font-size: 0.85rem; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--text); }
+.footer-copy { color: var(--muted); font-size: 0.82rem; }
+
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .difference { grid-template-columns: 1fr; }
+  .stats { gap: 2.5rem; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#" class="logo">POG<em>CLIP</em></a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#templates">Templates</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#" class="btn-sm btn-outline">Log In</a>
+    <a href="#" class="btn-sm btn-cyan">Start Free</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="blob blob-cyan"></div>
+  <div class="blob blob-pink"></div>
+  <div class="blob blob-purple"></div>
+
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    Captures Every Moment — Live
+  </div>
+
+  <h1 class="hero-title">
+    YOUR STREAM.<br>
+    <span class="t-cyan">AUTO-CLIPPED.</span><br>
+    <span class="t-pink">RIGHT NOW.</span>
+  </h1>
+
+  <p class="hero-sub">
+    PogClip's <strong>Live Engine</strong> runs quietly alongside your stream, capturing your biggest moments in real time. No uploads. No waiting. Just clips — formatted and ready — the second you go offline.
+  </p>
+
+  <div class="hero-ctas">
+    <a href="#" class="btn-big btn-big-cyan">Get Started Free →</a>
+    <a href="#how-it-works" class="btn-big btn-big-ghost">See How It Works</a>
+  </div>
+
+  <div class="platform-row">
+    <span class="platform-label">Works with</span>
+    <div class="platform-badges">
+      <span class="platform-badge"><span class="twitch-color">◆</span> Twitch</span>
+      <span class="platform-badge"><span class="kick-color">◆</span> Kick</span>
+    </div>
+  </div>
+
+  <div class="diff-banner">
+    ⚡ No uploads. No waiting. — <span>clips ready the moment you go offline</span>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<div class="stats">
+  <div class="stat-item">
+    <span class="stat-num c-cyan">0<span style="font-size:2rem">sec</span></span>
+    <span class="stat-label">Upload wait time</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num c-pink">20+</span>
+    <span class="stat-label">Clips per stream</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num c-purple">3</span>
+    <span class="stat-label">Platforms formatted</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" style="color:var(--text)">100%</span>
+    <span class="stat-label">Automated</span>
+  </div>
+</div>
+
+<!-- ── THE BIG DIFFERENCE ── -->
+<div class="difference reveal">
+  <div class="diff-left">
+    <div class="pill">Why PogClip Wins</div>
+    <h2>Every other tool makes you <em>wait.</em> We don't.</h2>
+    <p>Most clip tools make you <strong>dig up a link or upload a file after your stream ends.</strong> Then you wait for processing. Then you edit. By then the moment is already cold — and the algorithm has moved on.</p>
+    <p>PogClip's <strong>Live Engine runs quietly alongside your stream.</strong> The second your chat blows up, the clip is already being cut. When you go offline, your clips are waiting in the cloud — formatted, captioned, ready to post.</p>
+  </div>
+  <div class="diff-right">
+    <div class="compare-card">
+      <div class="compare-header">
+        <span>Feature</span>
+        <span class="col-pogclip">PogClip</span>
+        <span>Others</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-feature">Works live during stream</span>
+        <span class="check">✓</span>
+        <span class="cross">✗</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-feature">No URL upload needed</span>
+        <span class="check">✓</span>
+        <span class="cross">✗</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-feature">Clips ready when stream ends</span>
+        <span class="check">✓</span>
+        <span class="cross">✗</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-feature">Chat engagement detection</span>
+        <span class="check">✓</span>
+        <span class="cross">✗</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-feature">Twitch + Kick support</span>
+        <span class="check">✓</span>
+        <span class="check" style="color:var(--muted)">~</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-feature">Auto-format TikTok/Shorts</span>
+        <span class="check">✓</span>
+        <span class="check" style="color:var(--muted)">~</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-feature">Pick clip style before stream</span>
+        <span class="check">✓</span>
+        <span class="cross">✗</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="hiw" id="how-it-works">
+  <p class="section-tag">Simple as it gets</p>
+  <h2 class="section-title">Stream. Clip. Post.</h2>
+  <p class="section-sub">Three steps. Zero editing. Your clips are ready before you even leave your desk.</p>
+
+  <div class="steps">
+    <div class="step-card reveal">
+      <div class="step-num">01</div>
+      <div class="step-icon">🔗</div>
+      <h3>Connect Your Accounts</h3>
+      <p>Sign in with Twitch or Kick in one click. No tokens, no copy-pasting. Just connect and go.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">02</div>
+      <div class="step-icon">🎯</div>
+      <h3>Pick Your Clip Style</h3>
+      <p>Before you go live, choose which moments to capture — hype plays, big wins, funny fails, or all of them.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">03</div>
+      <div class="step-icon">🔴</div>
+      <h3>Go Live in OBS</h3>
+      <p>PogClip runs quietly in the background. It watches your chat, detects hype moments, and cuts clips automatically.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">04</div>
+      <div class="step-icon">📬</div>
+      <h3>Clips Ready When You End</h3>
+      <p>Stop streaming, open your dashboard. Your clips are already formatted for TikTok, Shorts, and Reels — just pick and post.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── TEMPLATES ── -->
+<section class="templates" id="templates">
+  <div class="templates-inner">
+    <p class="section-tag" style="text-align:center">Before you go live</p>
+    <h2 class="section-title" style="text-align:center">Pick Your Clip DNA</h2>
+    <p class="section-sub" style="text-align:center; margin:0 auto 0">Tell PogClip what kind of streamer you are. It'll hunt for exactly those moments.</p>
+    <div class="templates-grid">
+      <div class="template-card active reveal">
+        <span class="template-emoji">🔥</span>
+        <div class="template-name">Hype Moment</div>
+        <div class="template-desc">Chat explodes. Something insane just happened. These clips go viral.</div>
+        <span class="template-tag tag-cyan">Most Clipped</span>
+      </div>
+      <div class="template-card reveal">
+        <span class="template-emoji">💀</span>
+        <div class="template-name">Fail Clip</div>
+        <div class="template-desc">You messed up bad. Chat is LULing. These get the most comments.</div>
+        <span class="template-tag tag-pink">High Engagement</span>
+      </div>
+      <div class="template-card reveal">
+        <span class="template-emoji">🏆</span>
+        <div class="template-name">Big W</div>
+        <div class="template-desc">Victory. The chat goes GG. These clips build your reputation.</div>
+        <span class="template-tag tag-cyan">Grow Your Brand</span>
+      </div>
+      <div class="template-card reveal">
+        <span class="template-emoji">😤</span>
+        <div class="template-name">Reaction</div>
+        <div class="template-desc">Your genuine reaction to something wild. Authentic content wins.</div>
+        <span class="template-tag tag-purple">Authenticity</span>
+      </div>
+      <div class="template-card reveal">
+        <span class="template-emoji">🌊</span>
+        <div class="template-name">Chat Meme</div>
+        <div class="template-desc">Chat floods the same emote or word. Capture the chaos.</div>
+        <span class="template-tag tag-pink">Community Driven</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section class="pricing" id="pricing">
+  <p class="section-tag">Simple pricing</p>
+  <h2 class="section-title">No Surprises. Ever.</h2>
+  <p class="section-sub">Cancel anytime. No contracts. Upgrade when you're ready to grow.</p>
+
+  <div class="pricing-cards">
+    <div class="pricing-card reveal">
+      <div class="pricing-name">Starter</div>
+      <div class="pricing-price"><sup>$</sup>0<sub>/mo</sub></div>
+      <p class="pricing-desc">Perfect for testing the waters. Get a feel for what PogClip can do.</p>
+      <ul class="pricing-feats">
+        <li><span class="feat-check">✓</span> Up to 5 clips per stream</li>
+        <li><span class="feat-check">✓</span> Twitch support</li>
+        <li><span class="feat-check">✓</span> 720p clip quality</li>
+        <li><span class="feat-check">✓</span> TikTok format</li>
+        <li><span class="feat-cross">✗</span> Kick support</li>
+        <li><span class="feat-cross">✗</span> Cloud storage</li>
+      </ul>
+      <a href="#" class="btn-pricing btn-pricing-outline">Get Started Free</a>
+    </div>
+
+    <div class="pricing-card featured reveal">
+      <div class="pricing-name">Creator</div>
+      <div class="pricing-price"><sup>$</sup>19<sub>/mo</sub></div>
+      <p class="pricing-desc">For streamers serious about growing their content and audience.</p>
+      <ul class="pricing-feats">
+        <li><span class="feat-check">✓</span> Up to 20 clips per stream</li>
+        <li><span class="feat-check">✓</span> Twitch + Kick support</li>
+        <li><span class="feat-check">✓</span> 1080p clip quality</li>
+        <li><span class="feat-check">✓</span> TikTok, Shorts & Reels format</li>
+        <li><span class="feat-check">✓</span> Cloud storage (30 days)</li>
+        <li><span class="feat-check">✓</span> Auto-captions</li>
+      </ul>
+      <a href="#" class="btn-pricing btn-pricing-cyan">Start 7-Day Free Trial</a>
+    </div>
+
+    <div class="pricing-card reveal">
+      <div class="pricing-name">Pro</div>
+      <div class="pricing-price"><sup>$</sup>39<sub>/mo</sub></div>
+      <p class="pricing-desc">For full-time streamers and creators running a content machine.</p>
+      <ul class="pricing-feats">
+        <li><span class="feat-check">✓</span> Unlimited clips per stream</li>
+        <li><span class="feat-check">✓</span> Twitch + Kick support</li>
+        <li><span class="feat-check">✓</span> 1080p clip quality</li>
+        <li><span class="feat-check">✓</span> All platform formats</li>
+        <li><span class="feat-check">✓</span> Cloud storage (90 days)</li>
+        <li><span class="feat-check">✓</span> Priority processing</li>
+      </ul>
+      <a href="#" class="btn-pricing btn-pricing-outline">Go Pro</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="testimonials">
+  <div class="testimonials-inner">
+    <p class="section-tag" style="text-align:center">Early streamers love it</p>
+    <h2 class="section-title" style="text-align:center">Real Streamers. Real Clips.</h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"I used to spend 2 hours after every stream hunting for clips. PogClip just does it. I end my stream and the clips are sitting there waiting."</p>
+        <div class="testi-author">
+          <div class="testi-avatar av-cyan">NK</div>
+          <div>
+            <div class="testi-name">NotKevon</div>
+            <div class="testi-handle">Twitch Streamer · 4.2K followers</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Every tool I tried before made me wait until after my stream, dig up a link, upload it, then wait again. PogClip catches the moment WHILE it's happening. That's the difference between a viral clip and a missed one."</p>
+        <div class="testi-author">
+          <div class="testi-avatar av-pink">SV</div>
+          <div>
+            <div class="testi-name">StreamerVibe</div>
+            <div class="testi-handle">Kick Streamer · 1.8K followers</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"The chat detection is scary good. It knew my chat was hyping before I even realized what happened. My TikTok grew 800 followers in 3 weeks."</p>
+        <div class="testi-author">
+          <div class="testi-avatar av-purple">JX</div>
+          <div>
+            <div class="testi-name">JaxPlays</div>
+            <div class="testi-handle">Twitch + TikTok · 12K TikTok</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="faq" id="faq">
+  <p class="section-tag" style="text-align:center">Got questions</p>
+  <h2 class="section-title" style="text-align:center">We Got Answers.</h2>
+  <div class="faq-list">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span>Do I need to upload my VOD or stream link?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">No — and that's the whole point. PogClip's Live Engine runs quietly alongside your stream the moment you go live. There is nothing to upload. Your clips are captured and processed in real time, automatically.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span>How does PogClip know when to clip?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">PogClip watches your live chat in real time. When messages spike — especially hype words like "Pog", "LETS GO", "clip it" — it scores the excitement level and triggers a clip automatically. The more your chat reacts, the more likely a clip gets saved.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span>Does it work with both Twitch and Kick?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Yes. Both platforms are supported. You can stream on either and PogClip reads the chat from whichever platform you're live on. Kick support is available on Creator and Pro plans.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span>What happens to my clips after the stream?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">All clips are automatically uploaded to your secure cloud storage and appear in your PogClip dashboard. They're already formatted for TikTok, YouTube Shorts, and Instagram Reels. Just pick the ones you want and post them.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span>Will this slow down my stream or PC?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Not at all. PogClip's Live Engine is built to be lightweight. It runs as a background process that doesn't compete with your stream for resources. Your stream quality stays exactly the same — PogClip works silently behind the scenes.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        <span>Can I cancel anytime?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Absolutely. No contracts, no cancellation fees. Cancel from your dashboard in two clicks and you won't be charged again. Your clips remain accessible until your storage period ends.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section class="final-cta">
+  <h2>STOP MISSING<br><em>YOUR BEST MOMENTS.</em></h2>
+  <p>Your next clip is happening right now. Make sure it gets caught.</p>
+  <div class="cta-btns">
+    <a href="#" class="btn-big btn-big-cyan">Start Clipping Free →</a>
+    <a href="#pricing" class="btn-big btn-big-ghost">See Pricing</a>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">POG<em>CLIP</em></div>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Support</a>
+    <a href="#">Discord</a>
+  </div>
+  <div class="footer-copy">© 2026 PogClip. All rights reserved.</div>
+</footer>
+
+<script>
+// FAQ toggle
+function toggleFaq(el) {
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Template card toggle
+document.querySelectorAll('.template-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
